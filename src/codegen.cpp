@@ -113,7 +113,7 @@ static FunctionPassManager *FPM;
 
 // for image reloading
 static void *sysimg_handle;
-static bool imaging_mode = false;
+static bool imaging_mode = true;
 static std::map<size_t, std::string> delayed_fptrs;
 
 // types
@@ -286,7 +286,7 @@ extern "C" void jl_generate_fptr(jl_function_t *f)
         JL_SIGATOMIC_END();
         if (!imaging_mode)
             llvmf->deleteBody();
-        if (li->cFunctionObject != NULL)
+        if (!imaging_mode && li->cFunctionObject != NULL)
             ((Function*)li->cFunctionObject)->deleteBody();
     }
     f->fptr = li->fptr;
