@@ -33,7 +33,7 @@ $(foreach link,base test doc examples,$(eval $(call symlink_target,$(link),$(BUI
 debug release: | $(DIRS) $(BUILD)/share/julia/base $(BUILD)/share/julia/test $(BUILD)/share/julia/doc $(BUILD)/share/julia/examples $(BUILD)/etc/julia/juliarc.jl
 	@$(MAKE) $(QUIET_MAKE) julia-$@
 	@export JL_PRIVATE_LIBDIR=$(JL_PRIVATE_LIBDIR) && \
-	$(MAKE) $(QUIET_MAKE) LD_LIBRARY_PATH=$(BUILD)/lib:$(LD_LIBRARY_PATH) JULIA_EXECUTABLE="$(JULIA_EXECUTABLE_$@)" $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys.ji
+	$(MAKE) $(QUIET_MAKE) LD_LIBRARY_PATH=$(BUILD)/lib:$(LD_LIBRARY_PATH) JULIA_EXECUTABLE="$(JULIA_EXECUTABLE_$@)" $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys.$(SHLIB_EXT)
 
 julia-debug-symlink:
 	@ln -sf $(BUILD)/bin/julia-debug-$(DEFAULT_REPL) julia
@@ -65,15 +65,24 @@ $(BUILD)/etc/julia/juliarc.jl: etc/juliarc.jl | $(BUILD)/etc/julia
 	@cp $< $@
 
 # use sys.ji if it exists, otherwise run two stages
-$(BUILD)/$(JL_PRIVATE_LIBDIR)/sys0.ji:
-	@$(QUIET_JULIA) cd base && \
-	$(call spawn,$(JULIA_EXECUTABLE)) -bf sysimg.jl
-	mv $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys.ji $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys0.ji
+$(BUILD)/$(JL_PRIVATE_LIBDIR)/sys%ji: $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys%bc
 
-$(BUILD)/$(JL_PRIVATE_LIBDIR)/sys.ji: VERSION base/*.jl base/pkg/*.jl base/linalg/*.jl base/sparse/*.jl $(BUILD)/share/julia/helpdb.jl $(BUILD)/share/man/man1/julia.1 $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys0.ji
+$(BUILD)/$(JL_PRIVATE_LIBDIR)/sys%o: $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys%bc
+	$(call spawn,$(LLVM_LLC)) -filetype=obj -relocation-model=pic -o $@ $<
+
+$(BUILD)/$(JL_PRIVATE_LIBDIR)/sys%$(SHLIB_EXT): $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys%o
+	$(CXX) -shared -fPIC -L$(BUILD)/$(JL_PRIVATE_LIBDIR) -L$(BUILD)/$(JL_LIBDIR) -o $@ $< \
+		$$([ $(OS) = Darwin ] && echo -Wl,-undefined,dynamic_lookup || echo -Wl,--unresolved-symbols,ignore-all ) \
+		$$([ $(OS) = WINNT ] && echo -ljulia -lssp)
+
+$(BUILD)/$(JL_PRIVATE_LIBDIR)/sys0.bc:
 	@$(QUIET_JULIA) cd base && \
-	$(call spawn,$(JULIA_EXECUTABLE)) -f \
-		`[ -e $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys.ji ] || echo -J"$(BUILD)/$(JL_PRIVATE_LIBDIR)/sys0.ji"` sysimg.jl \
+	$(call spawn,$(JULIA_EXECUTABLE)) --build $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys0 sysimg.jl
+
+$(BUILD)/$(JL_PRIVATE_LIBDIR)/sys.bc: VERSION base/*.jl base/pkg/*.jl base/linalg/*.jl base/sparse/*.jl $(BUILD)/share/julia/helpdb.jl $(BUILD)/share/man/man1/julia.1 $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys0.$(SHLIB_EXT)
+	@$(QUIET_JULIA) cd base && \
+	$(call spawn,$(JULIA_EXECUTABLE)) --build $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys \
+		-J$(BUILD)/$(JL_PRIVATE_LIBDIR)/$$([ -e $(BUILD)/$(JL_PRIVATE_LIBDIR)/sys.ji ] && echo sys.ji || echo sys0.ji) -f sysimg.jl \
 		|| (echo "*** This error is usually fixed by running 'make clean'. If the error persists, try 'make cleanall'. ***" && false)
 
 run-julia-debug run-julia-release: run-julia-%:
@@ -243,7 +252,7 @@ clean: | $(CLEAN_TARGETS)
 	@$(MAKE) -C base clean
 	@$(MAKE) -C src clean
 	@$(MAKE) -C ui clean
-	for repltype in "basic" "readline"; do \
+		for repltype in "basic" "readline"; do \
 		rm -f usr/bin/julia-debug-$${repltype}; \
 		rm -f usr/bin/julia-$${repltype}; \
 	done

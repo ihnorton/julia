@@ -369,17 +369,17 @@ extern DLLEXPORT jl_datatype_t *jl_ascii_string_type;
 extern DLLEXPORT jl_datatype_t *jl_utf8_string_type;
 extern DLLEXPORT jl_datatype_t *jl_errorexception_type;
 extern DLLEXPORT jl_datatype_t *jl_loaderror_type;
-extern jl_datatype_t *jl_typeerror_type;
-extern jl_datatype_t *jl_methoderror_type;
-extern jl_value_t *jl_stackovf_exception;
-extern jl_value_t *jl_memory_exception;
-extern jl_value_t *jl_diverror_exception;
-extern jl_value_t *jl_domain_exception;
-extern jl_value_t *jl_overflow_exception;
-extern jl_value_t *jl_inexact_exception;
-extern jl_value_t *jl_undefref_exception;
-extern jl_value_t *jl_interrupt_exception;
-extern jl_value_t *jl_bounds_exception;
+extern DLLEXPORT jl_datatype_t *jl_typeerror_type;
+extern DLLEXPORT jl_datatype_t *jl_methoderror_type;
+extern DLLEXPORT jl_value_t *jl_stackovf_exception;
+extern DLLEXPORT jl_value_t *jl_memory_exception;
+extern DLLEXPORT jl_value_t *jl_diverror_exception;
+extern DLLEXPORT jl_value_t *jl_domain_exception;
+extern DLLEXPORT jl_value_t *jl_overflow_exception;
+extern DLLEXPORT jl_value_t *jl_inexact_exception;
+extern DLLEXPORT jl_value_t *jl_undefref_exception;
+extern DLLEXPORT jl_value_t *jl_interrupt_exception;
+extern DLLEXPORT jl_value_t *jl_bounds_exception;
 extern jl_value_t *jl_an_empty_cell;
 
 extern jl_datatype_t *jl_box_type;
@@ -429,8 +429,11 @@ extern jl_function_t *jl_unprotect_stack_func;
 extern jl_function_t *jl_bottom_func;
 
 extern uv_lib_t *jl_dl_handle;
+DLLEXPORT extern uv_lib_t *jl_RTLD_DEFAULT_handle;
 
 #if defined(_OS_WINDOWS_)
+DLLEXPORT extern uv_lib_t *jl_dl_handle;
+DLLEXPORT extern uv_lib_t *jl_exe_handle;
 extern uv_lib_t *jl_ntdll_handle;
 extern uv_lib_t *jl_exe_handle;
 extern uv_lib_t *jl_kernel32_handle;
@@ -704,7 +707,7 @@ DLLEXPORT jl_value_t *jl_new_struct_uninit(jl_datatype_t *type);
 DLLEXPORT jl_function_t *jl_new_closure(jl_fptr_t proc, jl_value_t *env,
                               jl_lambda_info_t *li);
 DLLEXPORT jl_lambda_info_t *jl_new_lambda_info(jl_value_t *ast, jl_tuple_t *sparams);
-jl_tuple_t *jl_tuple(size_t n, ...);
+DLLEXPORT jl_tuple_t *jl_tuple(size_t n, ...);
 jl_tuple_t *jl_tuple1(void *a);
 jl_tuple_t *jl_tuple2(void *a, void *b);
 DLLEXPORT jl_tuple_t *jl_alloc_tuple(size_t n);
@@ -724,23 +727,23 @@ void jl_add_method(jl_function_t *gf, jl_tuple_t *types, jl_function_t *meth,
                    jl_tuple_t *tvars);
 jl_value_t *jl_method_def(jl_sym_t *name, jl_value_t **bp, jl_binding_t *bnd,
                           jl_tuple_t *argtypes, jl_function_t *f);
-jl_value_t *jl_box_bool(int8_t x);
-jl_value_t *jl_box_int8(int32_t x);
-jl_value_t *jl_box_uint8(uint32_t x);
-jl_value_t *jl_box_int16(int16_t x);
-jl_value_t *jl_box_uint16(uint16_t x);
+DLLEXPORT jl_value_t *jl_box_bool(int8_t x);
+DLLEXPORT jl_value_t *jl_box_int8(int32_t x);
+DLLEXPORT jl_value_t *jl_box_uint8(uint32_t x);
+DLLEXPORT jl_value_t *jl_box_int16(int16_t x);
+DLLEXPORT jl_value_t *jl_box_uint16(uint16_t x);
 DLLEXPORT jl_value_t *jl_box_int32(int32_t x);
-jl_value_t *jl_box_uint32(uint32_t x);
-jl_value_t *jl_box_char(uint32_t x);
+DLLEXPORT jl_value_t *jl_box_uint32(uint32_t x);
+DLLEXPORT jl_value_t *jl_box_char(uint32_t x);
 DLLEXPORT jl_value_t *jl_box_int64(int64_t x);
-jl_value_t *jl_box_uint64(uint64_t x);
-jl_value_t *jl_box_float32(float x);
-jl_value_t *jl_box_float64(double x);
-jl_value_t *jl_box_voidpointer(void *x);
-jl_value_t *jl_box8 (jl_datatype_t *t, int8_t  x);
-jl_value_t *jl_box16(jl_datatype_t *t, int16_t x);
-jl_value_t *jl_box32(jl_datatype_t *t, int32_t x);
-jl_value_t *jl_box64(jl_datatype_t *t, int64_t x);
+DLLEXPORT jl_value_t *jl_box_uint64(uint64_t x);
+DLLEXPORT jl_value_t *jl_box_float32(float x);
+DLLEXPORT jl_value_t *jl_box_float64(double x);
+DLLEXPORT jl_value_t *jl_box_voidpointer(void *x);
+DLLEXPORT jl_value_t *jl_box8 (jl_datatype_t *t, int8_t  x);
+DLLEXPORT jl_value_t *jl_box16(jl_datatype_t *t, int16_t x);
+DLLEXPORT jl_value_t *jl_box32(jl_datatype_t *t, int32_t x);
+DLLEXPORT jl_value_t *jl_box64(jl_datatype_t *t, int64_t x);
 DLLEXPORT int8_t jl_unbox_bool(jl_value_t *v);
 DLLEXPORT int8_t jl_unbox_int8(jl_value_t *v);
 DLLEXPORT uint8_t jl_unbox_uint8(jl_value_t *v);
@@ -866,30 +869,33 @@ DLLEXPORT struct tm* localtime_r(const time_t *t, struct tm *tm);
 #endif
 
 // exceptions
-void NORETURN jl_error(const char *str);
+DLLEXPORT void NORETURN jl_error(const char *str);
 void NORETURN jl_errorf(const char *fmt, ...);
 void jl_too_few_args(const char *fname, int min);
 void jl_too_many_args(const char *fname, int max);
 void jl_type_error(const char *fname, jl_value_t *expected, jl_value_t *got);
-void jl_type_error_rt(const char *fname, const char *context,
-                      jl_value_t *ty, jl_value_t *got);
+DLLEXPORT void jl_type_error_rt(const char *fname, const char *context,
+                                jl_value_t *ty, jl_value_t *got);
 jl_value_t *jl_no_method_error(jl_function_t *f, jl_value_t **args, size_t na);
 void jl_check_type_tuple(jl_tuple_t *t, jl_sym_t *name, const char *ctx);
 
 // initialization functions
-DLLEXPORT void julia_init(char *imageFile);
-DLLEXPORT int julia_trampoline(int argc, char *argv[], int (*pmain)(int ac,char *av[]));
+DLLEXPORT void julia_init(char *imageFile, int build_mode);
+DLLEXPORT int julia_trampoline(int argc, char *argv[], int (*pmain)(int ac,char *av[]), char* build_mode);
 void jl_init_types(void);
 void jl_init_box_caches(void);
 DLLEXPORT void jl_init_frontend(void);
 void jl_init_primitives(void);
-void jl_init_codegen(void);
+void jl_init_codegen();
 void jl_init_intrinsic_functions(void);
 void jl_init_tasks(void *stack, size_t ssize);
 void jl_init_serializer(void);
 
-DLLEXPORT void jl_save_system_image(char *fname);
-DLLEXPORT void jl_restore_system_image(char *fname);
+void jl_save_system_image(char *fname);
+void jl_restore_system_image(char *fname, int build_mode);
+void jl_dump_bitcode(char *fname);
+void jl_set_imaging_mode(int stat);
+int32_t jl_get_llvm_gv(jl_value_t *p);
 
 // front end interface
 DLLEXPORT jl_value_t *jl_parse_input_line(const char *str);
@@ -929,8 +935,8 @@ DLLEXPORT int jl_is_const(jl_module_t *m, jl_sym_t *var);
 DLLEXPORT jl_value_t *jl_get_global(jl_module_t *m, jl_sym_t *var);
 DLLEXPORT void jl_set_global(jl_module_t *m, jl_sym_t *var, jl_value_t *val);
 DLLEXPORT void jl_set_const(jl_module_t *m, jl_sym_t *var, jl_value_t *val);
-void jl_checked_assignment(jl_binding_t *b, jl_value_t *rhs);
-void jl_declare_constant(jl_binding_t *b);
+DLLEXPORT void jl_checked_assignment(jl_binding_t *b, jl_value_t *rhs);
+DLLEXPORT void jl_declare_constant(jl_binding_t *b);
 void jl_module_using(jl_module_t *to, jl_module_t *from);
 void jl_module_use(jl_module_t *to, jl_module_t *from, jl_sym_t *s);
 void jl_module_import(jl_module_t *to, jl_module_t *from, jl_sym_t *s);
@@ -957,7 +963,7 @@ DLLEXPORT void *jl_dlsym_e(uv_lib_t *handle, char *symbol);
 DLLEXPORT void *jl_dlsym(uv_lib_t *handle, char *symbol);
 DLLEXPORT uv_lib_t *jl_wrap_raw_dl_handle(void *handle);
 void *jl_dlsym_e(uv_lib_t *handle, char *symbol); //supress errors
-void *jl_dlsym_win32(char *name);
+char *jl_dlfind_win32(char *name);
 DLLEXPORT int add_library_mapping(char *lib, void *hnd);
 
 // event loop
@@ -1231,6 +1237,7 @@ DLLEXPORT void jl_free2(void *p, void *hint);
 
 DLLEXPORT int jl_cpu_cores(void);
 DLLEXPORT long jl_getpagesize(void);
+DLLEXPORT int jl_is_debugbuild(void);
 
 typedef struct {
     uv_loop_t *loop;
@@ -1287,7 +1294,12 @@ DLLEXPORT void jl_pop_handler(int n);
 #if defined(_COMPILER_MINGW_)
 int __attribute__ ((__nothrow__,__returns_twice__)) jl_setjmp(jmp_buf _Buf);
 __declspec(noreturn) __attribute__ ((__nothrow__)) void jl_longjmp(jmp_buf _Buf,int _Value);
+#else
+int jl_setjmp(jmp_buf _Buf);
+void jl_longjmp(jmp_buf _Buf,int _Value);
+#endif
 #define jl_setjmp_f jl_setjmp
+#define jl_setjmp_name "jl_setjmp"
 #define jl_setjmp(a,b) jl_setjmp(a)
 #define jl_longjmp(a,b) jl_longjmp(a,b)
 #else
@@ -1298,9 +1310,11 @@ __declspec(noreturn) __attribute__ ((__nothrow__)) void jl_longjmp(jmp_buf _Buf,
 #else
 // determine actual entry point name
 #if defined(sigsetjmp)
-#define jl_setjmp_f    __sigsetjmp
+#define jl_setjmp_f     __sigsetjmp
+#define jl_setjmp_name "__sigsetjmp"
 #else
-#define jl_setjmp_f    sigsetjmp
+#define jl_setjmp_f     sigsetjmp
+#define jl_setjmp_name "sigsetjmp"
 #endif
 #define jl_setjmp(a,b) sigsetjmp(a,b)
 #define jl_longjmp(a,b) siglongjmp(a,b)
