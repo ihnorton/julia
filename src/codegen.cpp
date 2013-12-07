@@ -2014,7 +2014,7 @@ static void emit_assignment(jl_value_t *l, jl_value_t *r, jl_codectx_t *ctx)
     if (bnd) {
         rval = boxed(emit_expr(r, ctx, true),ctx);
         builder.CreateCall2(jlcheckassign_func,
-                            literal_pointer_val((void*)bnd),
+                            literal_pointer_val(bnd),
                             rval);
     }
     else {
@@ -2147,7 +2147,7 @@ static Value *emit_expr(jl_value_t *expr, jl_codectx_t *ctx, bool isboxed,
         jl_binding_t *b = jl_get_binding(mod, var);
         if (b == NULL)
             b = jl_get_binding_wr(mod, var);
-        Value *bp = literal_pointer_val(&b->value, jl_ppvalue_llvmt);
+        Value *bp = julia_binding_gv(b);
         if ((b->constp && b->value!=NULL) ||
             (etype!=(jl_value_t*)jl_any_type &&
              !jl_subtype((jl_value_t*)jl_undef_type, etype, 0))) {
@@ -2263,7 +2263,7 @@ static Value *emit_expr(jl_value_t *expr, jl_codectx_t *ctx, bool isboxed,
         make_gcroot(a1, ctx);
         Value *a2 = boxed(emit_expr(args[2], ctx),ctx);
         make_gcroot(a2, ctx);
-        Value *mdargs[5] = { name, bp, literal_pointer_val((void*)bnd), a1, a2 };
+        Value *mdargs[5] = { name, bp, literal_pointer_val(bnd), a1, a2 };
         ctx->argDepth = last_depth;
         return builder.CreateCall(jlmethod_func, ArrayRef<Value*>(&mdargs[0], 5));
     }
@@ -2274,7 +2274,7 @@ static Value *emit_expr(jl_value_t *expr, jl_codectx_t *ctx, bool isboxed,
         (void)var_binding_pointer(sym, &bnd, true, ctx);
         if (bnd) {
             builder.CreateCall(jldeclareconst_func,
-                               literal_pointer_val((void*)bnd));
+                               literal_pointer_val(bnd));
         }
     }
 
@@ -2314,7 +2314,7 @@ static Value *emit_expr(jl_value_t *expr, jl_codectx_t *ctx, bool isboxed,
                         Type *fty = julia_type_to_llvm(jtype);
                         if(fty == T_void)
                             continue;
-                        Value *fval = emit_unbox(fty, PointerType::get(fty,0), emit_unboxed(args[i+1],ctx), jtype);
+                        Value *fval = emit_unbox(fty, emit_unboxed(args[i+1],ctx), jtype);
                         if (fty == T_int1)
                             fval = builder.CreateZExt(fval, T_int8);
                         strct = builder.
@@ -3365,6 +3365,34 @@ static Function *jlfunc_to_llvm(const std::string &cname, void *addr)
                          cname, jl_Module);
     jl_ExecutionEngine->addGlobalMapping(f, addr);
     return f;
+}
+
+extern "C" void jlfptr_to_llvm(void *fptr, jl_lambda_info_t *lam, int specsig) {
+    // this assigns a function pointer (from loading the system image), to the function object
+    if (specsig) {
+        jl_value_t *jlrettype = jl_ast_rettype(lam, (jl_value_t*)lam->ast);
+        std::vector<Type*> fsig(0);
+        for(size_t i=0; i < jl_tuple_len(lam->specTypes); i++) {
+            fsig.push_back(julia_type_to_llvm(jl_tupleref(lam->specTypes,i)));
+        }
+        Type *rt = (jlrettype == (jl_value_t*)jl_nothing->type ? T_void : julia_type_to_llvm(jlrettype));
+        Function *f =
+            Function::Create(FunctionType::get(rt, fsig, false), Function::ExternalLinkage,
+                             "jl_julia_fptr", jl_Module);
+        if (lam->cFunctionObject == NULL) {
+            lam->cFunctionObject = (void*)f;
+            lam->cFunctionID = jl_assign_functionID(f);
+        }
+        jl_ExecutionEngine->addGlobalMapping(f, (void*)fptr);
+    } else {
+        Function *f = jlfunc_to_llvm("jl_julia_fptr", fptr);
+        if (lam->functionObject == NULL) {
+            lam->functionObject = (void*)f;
+            lam->functionID = jl_assign_functionID(f);
+            assert(lam->fptr == &jl_trampoline);
+            lam->fptr = (jl_fptr_t)fptr;
+        }
+    }
 }
 
 extern "C" jl_value_t *jl_new_box(jl_value_t *v)

@@ -183,6 +183,8 @@ typedef struct _jl_lambda_info_t {
     jl_fptr_t fptr;        // jlcall entry point
     void *functionObject;  // jlcall llvm Function
     void *cFunctionObject; // c callable llvm Function
+    int32_t functionID; // index that this function will have in the codegen table
+    int32_t cFunctionID; // index that this cFunction will have in the codegen table
 } jl_lambda_info_t;
 
 #define LAMBDA_INFO_NW (NWORDS(sizeof(jl_lambda_info_t))-1)
@@ -1277,6 +1279,8 @@ DLLEXPORT JL_STREAM *jl_stdout_stream();
 DLLEXPORT JL_STREAM *jl_stdin_stream();
 DLLEXPORT JL_STREAM *jl_stderr_stream();
 
+extern char* julia_home;
+
 STATIC_INLINE void jl_eh_restore_state(jl_handler_t *eh)
 {
     JL_SIGATOMIC_BEGIN();
@@ -1343,4 +1347,3 @@ void jl_longjmp(jmp_buf _Buf,int _Value);
 }
 #endif
 
-#endif
