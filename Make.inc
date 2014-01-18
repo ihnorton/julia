@@ -245,7 +245,8 @@ endif
 endif
 
 ifeq ($(USEGCC),1)
-ifneq ($(ARCH), ppc64)
+ifeq ($(ARCH), arm)
+else ifneq ($(ARCH), ppc64)
   SHIPFLAGS += -momit-leaf-frame-pointer
 endif
 endif

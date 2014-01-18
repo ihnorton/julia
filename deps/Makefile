@@ -832,6 +832,8 @@ else ifeq ($(ARCH),i686)
 OPENBLAS_BUILD_OPTS += BINARY=32
 else ifeq ($(ARCH),x86_64)
 OPENBLAS_BUILD_OPTS += BINARY=64
+else ifeq ($(ARCH),arm)
+OPENBLAS_BUILD_OPTS += BINARY=32
 else
 $(error "unknown arch for openblas cross-compile")
 endif
@@ -1110,7 +1112,9 @@ FFTW_SINGLE_OBJ_TARGET = $(BUILD)/$(JL_LIBDIR)/libfftw3f.$(SHLIB_EXT)
 FFTW_DOUBLE_OBJ_TARGET = $(BUILD)/$(JL_LIBDIR)/libfftw3.$(SHLIB_EXT)
 
 FFTW_CONFIG = --enable-shared --disable-fortran --disable-mpi --enable-fma --enable-threads
-ifneq ($(ARCH), ppc64)
+ifeq ($(ARCH), arm)
+  FFTW_CONFIG += --enable-neon
+else ifneq ($(ARCH), ppc)
   FFTW_CONFIG += --enable-sse2
 endif
 ifeq ($(OS),WINNT)
