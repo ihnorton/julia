@@ -17,10 +17,10 @@ void libsupport_init(void)
 
         ios_init_stdstreams();
 
-        D_PNAN = strtod("+NaN",NULL);
-        D_NNAN = -strtod("+NaN",NULL);
-        D_PINF = strtod("+Inf",NULL);
-        D_NINF = strtod("-Inf",NULL);
+        D_PNAN = strtod_c("+NaN",NULL);
+        D_NNAN = -strtod_c("+NaN",NULL);
+        D_PINF = strtod_c("+Inf",NULL);
+        D_NINF = strtod_c("-Inf",NULL);
         isInitialized=1;
     }
 }
