@@ -5,10 +5,12 @@
 #include <locale.h>
 #define LOCALE_T _locale_t
 #define STRTOD_L _strtod_l
+#define STRTOF_L _strtof_l
 #else
 #include <xlocale.h>
 #define LOCALE_T locale_t
 #define STRTOD_L strtod_l
+#define STRTOF_L strtof_l
 #endif
 
 // Cache locale object
@@ -32,5 +34,10 @@ LOCALE_T get_c_locale()
 double strtod_c(const char *nptr, char **endptr)
 {
   return STRTOD_L(nptr, endptr, get_c_locale());
+}
+
+float strtof_c(const char *nptr, char **endptr)
+{
+  return STRTOF_L(nptr, endptr, get_c_locale());
 }
 

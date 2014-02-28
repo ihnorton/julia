@@ -670,7 +670,7 @@ DLLEXPORT int jl_substrtof(char *str, int offset, int len, float *out)
 #if defined(_OS_WINDOWS_) && !defined(_COMPILER_MINGW_)
     *out = (float)strtod_c(bstr, &p);
 #else
-    *out = strtof(bstr, &p);
+    *out = strtof_c(bstr, &p);
 #endif
 
     if ((p == bstr) || (p != (bstr+len)) ||
@@ -686,7 +686,7 @@ DLLEXPORT int jl_strtof(char *str, float *out)
 #if defined(_OS_WINDOWS_) && !defined(_COMPILER_MINGW_)
     *out = (float)strtod_c(str, &p);
 #else
-    *out = strtof(str, &p);
+    *out = strtof_c(str, &p);
 #endif
     if (p == str ||
         (errno==ERANGE && (*out==0 || *out==HUGE_VALF || *out==-HUGE_VALF)))
