@@ -1,8 +1,8 @@
 #include "libsupport.h"
 #include <stdlib.h>
+#include <locale.h>
 
 #if defined(_OS_WINDOWS_)
-#include <locale.h>
 #define LOCALE_T _locale_t
 #define STRTOD_L _strtod_l
 #define STRTOF_L _strtof_l
