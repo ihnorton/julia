@@ -13,8 +13,8 @@
 #define STRTOD_L strtod_l
 #define STRTOF_L strtof_l
 #if defined(_OS_LINUX_)
-double strtod_l(const char *nptr, char **endptr, locale_t loc);
-float strtof_l(const char *nptr, char **endptr, locale_t loc);
+extern double strtod_l(const char *nptr, char **endptr, locale_t loc);
+extern float strtof_l(const char *nptr, char **endptr, locale_t loc);
 #endif
 #endif
 
