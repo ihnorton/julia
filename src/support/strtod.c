@@ -30,7 +30,7 @@ LOCALE_T get_c_locale()
 #if defined(_OS_WINDOWS_)
     c_locale = _create_locale(LC_ALL,"C");
 #else
-    c_locale = newlocale(LC_ALL_MASK, NULL, NULL);
+    c_locale = newlocale(LC_ALL_MASK, "C", NULL);
 #endif
   }
   return c_locale;
