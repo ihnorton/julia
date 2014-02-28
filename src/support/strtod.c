@@ -1,4 +1,5 @@
 #include "libsupport.h"
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <locale.h>
 
