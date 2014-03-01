@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <locale.h>
 
+#if defined(_COMPILER_MINGW_)
+#include <locale.h>
+#endif
 #if defined(_OS_WINDOWS_)
 #define LOCALE_T _locale_t
 #define STRTOD_L _strtod_l
