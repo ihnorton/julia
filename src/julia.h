@@ -371,6 +371,7 @@ extern DLLEXPORT jl_value_t *jl_array_any_type;
 extern DLLEXPORT jl_value_t *jl_array_symbol_type;
 extern DLLEXPORT jl_datatype_t *jl_expr_type;
 extern DLLEXPORT jl_datatype_t *jl_symbolnode_type;
+extern DLLEXPORT jl_datatype_t *jl_field_type;
 extern DLLEXPORT jl_datatype_t *jl_getfieldnode_type;
 extern DLLEXPORT jl_datatype_t *jl_linenumbernode_type;
 extern DLLEXPORT jl_datatype_t *jl_labelnode_type;
@@ -403,7 +404,8 @@ extern uv_lib_t *jl_winsock_handle;
 // some important symbols
 extern jl_sym_t *call_sym;
 extern jl_sym_t *call1_sym;
-extern jl_sym_t *dots_sym;
+extern jl_sym_t *dots_sym;    
+extern DLLEXPORT jl_sym_t *field_sym;
 extern jl_sym_t *quote_sym;   extern jl_sym_t *newvar_sym;
 extern jl_sym_t *top_sym;     extern jl_sym_t *dot_sym;
 extern jl_sym_t *line_sym;    extern jl_sym_t *toplevel_sym;
@@ -576,6 +578,12 @@ STATIC_INLINE int jl_is_cpointer_type(void *t)
 {
     return (jl_is_datatype(t) &&
             ((jl_datatype_t*)(t))->name == jl_pointer_type->name);
+}
+
+STATIC_INLINE int jl_is_field_type(jl_value_t *v)
+{
+    return (jl_is_datatype(v) &&
+            ((jl_datatype_t*)(v))->name == jl_field_type->name);
 }
 
 STATIC_INLINE int jl_is_vararg_type(jl_value_t *v)

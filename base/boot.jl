@@ -120,7 +120,7 @@ export
     AbstractArray, DenseArray,
     # special objects
     Box, Function, IntrinsicFunction, LambdaStaticData, Method, MethodTable,
-    Module, Nothing, Symbol, Task, Array,
+    Module, Nothing, Symbol, Task, Array, Field,
     # numeric types
     Bool, FloatingPoint, Float16, Float32, Float64, Number, Integer, Int, Int8, Int16,
     Int32, Int64, Int128, Ptr, Real, Signed, Uint, Uint8, Uint16, Uint32,
@@ -224,6 +224,8 @@ type SymbolNode
     typ
     SymbolNode(name::Symbol, t::ANY) = new(name, t)
 end
+
+immutable Field{S} end
 
 type GetfieldNode
     value

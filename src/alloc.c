@@ -56,6 +56,7 @@ jl_datatype_t *jl_loaderror_type;
 jl_datatype_t *jl_undefvarerror_type;
 jl_datatype_t *jl_pointer_type;
 jl_datatype_t *jl_voidpointer_type;
+jl_datatype_t *jl_field_type;
 jl_value_t *jl_an_empty_cell=NULL;
 jl_value_t *jl_stackovf_exception;
 jl_value_t *jl_diverror_exception;
@@ -90,6 +91,7 @@ jl_sym_t *abstracttype_sym; jl_sym_t *bitstype_sym;
 jl_sym_t *compositetype_sym; jl_sym_t *type_goto_sym;
 jl_sym_t *global_sym; jl_sym_t *tuple_sym;
 jl_sym_t *dot_sym;    jl_sym_t *newvar_sym;
+jl_sym_t *field_sym;
 jl_sym_t *boundscheck_sym; jl_sym_t *copyast_sym;
 jl_sym_t *simdloop_sym;
 
