@@ -782,7 +782,7 @@ static jl_value_t *static_eval(jl_value_t *ex, jl_codectx_t *ctx, bool sparams,
         return NULL;
     jl_module_t *m = NULL;
     jl_sym_t *s = NULL;
-    if (jl_is_getfieldnode(ex)) {
+    if (jl_is_getfieldnode(ex)) { // GTF CHECK
         m = (jl_module_t*)static_eval(jl_fieldref(ex,0),ctx,sparams,allow_alloc);
         s = (jl_sym_t*)jl_fieldref(ex,1);
         if (m && jl_is_module(m) && s && jl_is_symbol(s)) {
@@ -819,7 +819,7 @@ static jl_value_t *static_eval(jl_value_t *ex, jl_codectx_t *ctx, bool sparams,
                         return result;
                     }
                 }
-                else if (jl_array_dim0(e->args) == 3 && fptr == &jl_f_get_field) {
+                else if (jl_array_dim0(e->args) == 3 && fptr == &jl_f_get_field) { // GTF DONE?
                     m = (jl_module_t*)static_eval(jl_exprarg(e,1),ctx,sparams,allow_alloc);
                     s = (jl_sym_t*)static_eval(jl_exprarg(e,2),ctx,sparams,allow_alloc);
                     if (m && jl_is_module(m) && s && jl_is_symbol(s)) {
@@ -894,7 +894,7 @@ static bool local_var_occurs(jl_value_t *e, jl_sym_t *s)
                 return true;
         }
     }
-    else if (jl_is_getfieldnode(e)) {
+    else if (jl_is_getfieldnode(e)) { // GTF CHECK
         if (local_var_occurs(jl_fieldref(e,0),s))
             return true;
     }
@@ -1059,7 +1059,7 @@ static Value *make_gcroot(Value *v, jl_codectx_t *ctx)
 
 // test whether getting a field from the given type using the given
 // field expression would not allocate memory
-static bool is_getfield_nonallocating(jl_datatype_t *ty, jl_value_t *fld)
+static bool is_getfield_nonallocating(jl_datatype_t *ty, jl_value_t *fld) // GTF CHECK
 {
     if (!jl_is_leaf_type((jl_value_t*)ty))
         return false;
@@ -1124,7 +1124,7 @@ static bool is_stable_expr(jl_value_t *ex, jl_codectx_t *ctx)
                 // something reached via getfield from a stable value is also stable.
                 if (jl_array_dim0(e->args) == 3) {
                     jl_value_t *ty = expr_type(jl_exprarg(e,1), ctx);
-                    if ((fptr == &jl_f_get_field && jl_is_immutable_datatype(ty) &&
+                    if ((fptr == &jl_f_get_field && jl_is_immutable_datatype(ty) && // GTF TODO
                          is_getfield_nonallocating((jl_datatype_t*)ty, jl_exprarg(e,2))) ||
                         (fptr == &jl_f_tupleref && jl_tupleref_nonallocating(ty, jl_exprarg(e,2)))) {
                         if (is_stable_expr(jl_exprarg(e,1), ctx))
@@ -1857,15 +1857,17 @@ static Value *emit_known_call(jl_value_t *ff, jl_value_t **args, size_t nargs,
             }
         }
     }
-    else if (f->fptr == &jl_f_get_field && nargs==2) {
-        if (jl_is_quotenode(args[2]) && jl_is_symbol(jl_fieldref(args[2],0))) {
+    else if (f->fptr == &jl_f_get_field && nargs==2) { // GTF PART
+        jl_value_t* fieldarg = jl_exprarg(args[2],2);
+        if (jl_is_quotenode(fieldarg) && jl_is_symbol(jl_fieldref(fieldarg,0))) {
             Value *fld = emit_getfield(args[1],
-                                       (jl_sym_t*)jl_fieldref(args[2],0), ctx);
+                                       (jl_sym_t*)jl_fieldref(fieldarg,0), ctx);
             JL_GC_POP();
             return fld;
         }
         jl_datatype_t *stt = (jl_datatype_t*)expr_type(args[1], ctx);
         jl_value_t *fldt   = expr_type(args[2], ctx);
+        assert(true); // GTF TODO
         if (jl_is_structtype(stt) && fldt == (jl_value_t*)jl_long_type && !jl_subtype((jl_value_t*)jl_module_type, (jl_value_t*)stt, 0)) {
             size_t nfields = jl_tuple_len(stt->names);
             // integer index

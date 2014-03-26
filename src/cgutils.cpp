@@ -930,7 +930,7 @@ static jl_value_t *expr_type(jl_value_t *e, jl_codectx_t *ctx)
     }
     if (jl_is_lambda_info(e))
         return (jl_value_t*)jl_function_type;
-    if (jl_is_getfieldnode(e)) {
+    if (jl_is_getfieldnode(e)) { // GTF CHECK
         jl_value_t *v = static_eval(e, ctx);
         if (v == NULL)
             return jl_getfieldnode_type(e);

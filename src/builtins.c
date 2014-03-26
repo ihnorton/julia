@@ -488,30 +488,44 @@ JL_CALLABLE(jl_f_tuplelen)
 
 // composite types ------------------------------------------------------------
 
-JL_CALLABLE(jl_f_get_field)
+JL_CALLABLE(jl_f_get_field) // GTF DONE
 {
     JL_NARGS(getfield, 2, 2);
     jl_value_t *v = args[0];
     jl_value_t *vt = (jl_value_t*)jl_typeof(v);
-    if (vt == (jl_value_t*)jl_module_type) {
-        JL_TYPECHK(getfield, symbol, args[1]);
-        return jl_eval_global_var((jl_module_t*)v, (jl_sym_t*)args[1]);
-    }
+    jl_value_t *sy;
     if (!jl_is_datatype(vt))
         jl_type_error("getfield", (jl_value_t*)jl_datatype_type, v);
+    
+    if (jl_is_field_type(args[1]))
+        sy = (jl_value_t*)jl_tupleref( ((jl_datatype_t*)args[1])->parameters,0);
+    else
+        sy = args[1];
+
+    if (vt == (jl_value_t*)jl_module_type) {
+        JL_TYPECHK(getfield, symbol, sy);
+        return jl_eval_global_var((jl_module_t*)v, (jl_sym_t*)sy);
+    }
     jl_datatype_t *st = (jl_datatype_t*)vt;
-    size_t idx;
-    if (jl_is_long(args[1])) {
-        idx = jl_unbox_long(args[1])-1;
+    ssize_t idx;
+    if (jl_is_long(sy)) {
+        idx = jl_unbox_long(sy)-1;
         if (idx >= jl_tuple_len(st->names))
             jl_throw(jl_bounds_exception);
     }
     else {
-        JL_TYPECHK(getfield, symbol, args[1]);
-        jl_sym_t *fld = (jl_sym_t*)args[1];
-        idx = jl_field_index(st, fld, 1);
+        JL_TYPECHK(getfield, symbol, sy);
+        jl_sym_t *fld = (jl_sym_t*)sy;
+        idx = jl_field_index(st, fld, 0);
     }
-    jl_value_t *fval = jl_get_nth_field(v, idx);
+    jl_value_t* fval = 0;
+    if (idx != -1) {
+        fval = jl_get_nth_field(v, idx);
+    }
+    //else {
+    //    jl_function_t* f = (jl_function_t*)jl_get_global(jl_main_module, jl_symbol("getfield"));
+    //    fval = jl_apply(f, args, 2);
+    //}
     if (fval == NULL)
         jl_throw(jl_undefref_exception);
     return fval;
