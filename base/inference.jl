@@ -331,8 +331,8 @@ const getfield_tfunc = function (A, s0, name)
     if !isa(s,DataType) || s.abstract
         return Any
     end
-    if isa(A[2],QuoteNode) && isa(A[2].value,Symbol)
-        fld = A[2].value
+    if isa(A[2],Expr) && isa(A[2].args[3],QuoteNode) && isa(A[2].args[3].value,Symbol)
+        fld = A[2].args[3].value
         A1 = A[1]
         if isa(A1,Module) && isdefined(A1,fld) && isconst(A1, fld)
             return abstract_eval_constant(eval(A1,fld))
@@ -540,9 +540,9 @@ function isconstantfunc(f::ANY, sv::StaticVarInfo)
         return isdefined(M,s) && isconst(M,s) && f
     end
     if isa(f,Expr) && (is(f.head,:call) || is(f.head,:call1))
-        if length(f.args) == 3 && isa(f.args[1], TopNode) &&
-            is(f.args[1].name,:getfield) && isa(f.args[3],QuoteNode)
-            s = f.args[3].value
+        if (length(f.args) == 3 && isa(f.args[1], TopNode) && is(f.args[1].name,:getfield) &&
+            ( isa(f.args[3].args[3],QuoteNode)) || (isa(f.args[3], DataType) && is(f.args[3].name.name, :Field)) )
+            s = isa(f.args[3], DataType) ? f.args[3].parameters[1] : f.args[3].args[3].value
             if isa(f.args[2],Module)
                 M = f.args[2]
             else
@@ -606,7 +606,7 @@ const limit_tuple_type_n = function (t::Tuple, lim::Int)
 end
 
 function abstract_call_gf(f, fargs, argtypes, e)
-    if length(argtypes)>1 && (argtypes[1] <: Tuple) && argtypes[2]===Int
+    if length(argtypes)>1 && isa(argtypes[1],Tuple) && argtypes[2]===Int
         # allow tuple indexing functions to take advantage of constant
         # index arguments.
         if f === Main.Base.getindex
@@ -2228,14 +2228,7 @@ function inlineable(f, e::Expr, atypes, sv, enclosing_ast)
     else
         expr = lastexpr.args[1]
     end
-
-    if isa(expr,Expr)
-        old_t = e.typ
-        if old_t <: expr.typ
-            expr.typ = old_t
-        end
-    end
-    return (expr, stmts)
+    return (sym_replace(expr, args, spnames, argexprs, spvals), stmts)
 end
 
 function inline_worthy(body::Expr)
@@ -2685,6 +2678,7 @@ function tuple_elim_pass(ast::Expr)
         end
         var = e.args[1]
         rhs = e.args[2]
+        
         if isa(rhs,Expr) && is_known_call(rhs, tuple, sv)
             tup = rhs.args
             nv = length(tup)-1

@@ -522,10 +522,6 @@ JL_CALLABLE(jl_f_get_field) // GTF DONE
     if (idx != -1) {
         fval = jl_get_nth_field(v, idx);
     }
-    //else {
-    //    jl_function_t* f = (jl_function_t*)jl_get_global(jl_main_module, jl_symbol("getfield"));
-    //    fval = jl_apply(f, args, 2);
-    //}
     if (fval == NULL)
         jl_throw(jl_undefref_exception);
     return fval;

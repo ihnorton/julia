@@ -783,6 +783,7 @@ static jl_value_t *static_eval(jl_value_t *ex, jl_codectx_t *ctx, bool sparams,
     jl_module_t *m = NULL;
     jl_sym_t *s = NULL;
     if (jl_is_getfieldnode(ex)) { // GTF CHECK
+        assert(true);
         m = (jl_module_t*)static_eval(jl_fieldref(ex,0),ctx,sparams,allow_alloc);
         s = (jl_sym_t*)jl_fieldref(ex,1);
         if (m && jl_is_module(m) && s && jl_is_symbol(s)) {
@@ -790,6 +791,7 @@ static jl_value_t *static_eval(jl_value_t *ex, jl_codectx_t *ctx, bool sparams,
             if (b && b->constp)
                 return b->value;
         }
+        assert(true);
         return NULL;
     }
     if (jl_is_expr(ex)) {
@@ -821,12 +823,16 @@ static jl_value_t *static_eval(jl_value_t *ex, jl_codectx_t *ctx, bool sparams,
                 }
                 else if (jl_array_dim0(e->args) == 3 && fptr == &jl_f_get_field) { // GTF DONE?
                     m = (jl_module_t*)static_eval(jl_exprarg(e,1),ctx,sparams,allow_alloc);
-                    s = (jl_sym_t*)static_eval(jl_exprarg(e,2),ctx,sparams,allow_alloc);
+                    if (jl_is_field_type(jl_exprarg(e,2)))
+                        s = (jl_sym_t*)jl_tupleref( ((jl_datatype_t*)jl_exprarg(e,2))->parameters,0);
+                    else
+                        s = (jl_sym_t*)static_eval(jl_exprarg(jl_exprarg(e,2),2),ctx,sparams,allow_alloc);
                     if (m && jl_is_module(m) && s && jl_is_symbol(s)) {
                         jl_binding_t *b = jl_get_binding(m, s);
                         if (b && b->constp)
                             return b->value;
                     }
+                    assert(true);
                 }
                 else if (fptr == &jl_f_tuple) {
                     size_t i;
@@ -895,6 +901,7 @@ static bool local_var_occurs(jl_value_t *e, jl_sym_t *s)
         }
     }
     else if (jl_is_getfieldnode(e)) { // GTF CHECK
+        assert(true);
         if (local_var_occurs(jl_fieldref(e,0),s))
             return true;
     }
@@ -1063,9 +1070,13 @@ static bool is_getfield_nonallocating(jl_datatype_t *ty, jl_value_t *fld) // GTF
 {
     if (!jl_is_leaf_type((jl_value_t*)ty))
         return false;
+    assert(true);
     jl_sym_t *name = NULL;
     if (jl_is_quotenode(fld) && jl_is_symbol(jl_fieldref(fld,0))) {
         name = (jl_sym_t*)jl_fieldref(fld,0);
+    }
+    else if (jl_is_field_type(fld)) {
+        name = (jl_sym_t*)jl_tupleref( ((jl_datatype_t*)fld)->parameters,0);
     }
     for(size_t i=0; i < jl_tuple_len(ty->types); i++) {
         if (!(ty->fields[i].isptr ||
@@ -1124,7 +1135,7 @@ static bool is_stable_expr(jl_value_t *ex, jl_codectx_t *ctx)
                 // something reached via getfield from a stable value is also stable.
                 if (jl_array_dim0(e->args) == 3) {
                     jl_value_t *ty = expr_type(jl_exprarg(e,1), ctx);
-                    if ((fptr == &jl_f_get_field && jl_is_immutable_datatype(ty) && // GTF TODO
+                    if ((fptr == &jl_f_get_field && jl_is_immutable_datatype(ty) && // GTF DONE: handled in is_gf_nonalloc
                          is_getfield_nonallocating((jl_datatype_t*)ty, jl_exprarg(e,2))) ||
                         (fptr == &jl_f_tupleref && jl_tupleref_nonallocating(ty, jl_exprarg(e,2)))) {
                         if (is_stable_expr(jl_exprarg(e,1), ctx))
@@ -1858,10 +1869,17 @@ static Value *emit_known_call(jl_value_t *ff, jl_value_t **args, size_t nargs,
         }
     }
     else if (f->fptr == &jl_f_get_field && nargs==2) { // GTF PART
-        jl_value_t* fieldarg = jl_exprarg(args[2],2);
-        if (jl_is_quotenode(fieldarg) && jl_is_symbol(jl_fieldref(fieldarg,0))) {
+        jl_value_t* fieldarg;
+        if (jl_is_field_type(args[2])) {
+            fieldarg = jl_tupleref(((jl_datatype_t*)args[2])->parameters,0);
+        }
+        else {
+            fieldarg = jl_fieldref(jl_exprarg(args[2],2),0);
+        }
+
+        if ( (jl_is_quotenode(fieldarg) && jl_is_symbol(jl_fieldref(fieldarg,0))) || jl_is_symbol(fieldarg)) {
             Value *fld = emit_getfield(args[1],
-                                       (jl_sym_t*)jl_fieldref(fieldarg,0), ctx);
+                                       (jl_sym_t*)fieldarg, ctx);
             JL_GC_POP();
             return fld;
         }
