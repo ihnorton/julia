@@ -541,7 +541,7 @@ function isconstantfunc(f::ANY, sv::StaticVarInfo)
     end
     if isa(f,Expr) && (is(f.head,:call) || is(f.head,:call1))
         if (length(f.args) == 3 && isa(f.args[1], TopNode) && is(f.args[1].name,:getfield) &&
-            ( isa(f.args[3].args[3],QuoteNode)) || (isa(f.args[3], DataType) && is(f.args[3].name.name, :Field)) )
+            ( (isa(f.args[3], DataType) && is(f.args[3].name.name, :Field)) || (isa(f.args[3].args[3],QuoteNode)) ) )
             s = isa(f.args[3], DataType) ? f.args[3].parameters[1] : f.args[3].args[3].value
             if isa(f.args[2],Module)
                 M = f.args[2]

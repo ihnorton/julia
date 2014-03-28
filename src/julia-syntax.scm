@@ -1488,7 +1488,7 @@
 
    '|.|
    (lambda (e)
-     `(call (top getfield) ,(expand-forms (cadr e)) (call (top apply_type) Field ,(expand-forms (caddr e)) )))
+     `(call (top getfield) ,(expand-forms (cadr e)) (call (top apply_type) (top Field) ,(expand-forms (caddr e)) )))
 
    'in
    (lambda (e)
