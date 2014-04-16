@@ -55,7 +55,7 @@
 #define ENABLE_INFERENCE
 
 // print all signatures type inference is invoked on
-#define TRACE_INFERENCE
+//#define TRACE_INFERENCE
 
 // print all generic method dispatches (excludes inlined and specialized call
 // sites). this generally prints too much output to be useful.

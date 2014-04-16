@@ -6,7 +6,7 @@ baremodule Base
 eval(x) = Core.eval(Base,x)
 eval(m,x) = Core.eval(m,x)
 
-include = Core.include
+include = getfield(Core, :include)
 
 include("exports.jl")
 
