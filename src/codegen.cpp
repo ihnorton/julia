@@ -354,7 +354,7 @@ void jl_dump_objfile(char* fname, int jit_model)
         jl_TargetMachine->getTargetCPU(),
         jl_TargetMachine->getTargetFeatureString(),
         jl_TargetMachine->Options,
-#if defined(_OS_LINUX_) || defined(_OS_FREEBSD_)
+#ifdef _OS_LINUX_
         Reloc::PIC_,
 #else
         jit_model ? Reloc::PIC_ : Reloc::Default,
@@ -834,7 +834,6 @@ static jl_value_t *static_eval(jl_value_t *ex, jl_codectx_t *ctx, bool sparams,
                         if (b && b->constp)
                             return b->value;
                     }
-                    assert(true);
                 }
                 else if (fptr == &jl_f_tuple) {
                     size_t i;
@@ -903,7 +902,6 @@ static bool local_var_occurs(jl_value_t *e, jl_sym_t *s)
         }
     }
     else if (jl_is_getfieldnode(e)) { // GTF CHECK
-        assert(true);
         if (local_var_occurs(jl_fieldref(e,0),s))
             return true;
     }
@@ -1072,7 +1070,6 @@ static bool is_getfield_nonallocating(jl_datatype_t *ty, jl_value_t *fld) // GTF
 {
     if (!jl_is_leaf_type((jl_value_t*)ty))
         return false;
-    assert(true);
     jl_sym_t *name = NULL;
     if (jl_is_quotenode(fld) && jl_is_symbol(jl_fieldref(fld,0))) {
         name = (jl_sym_t*)jl_fieldref(fld,0);
