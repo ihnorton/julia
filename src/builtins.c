@@ -516,9 +516,9 @@ JL_CALLABLE(jl_f_get_field) // GTF DONE
     else {
         JL_TYPECHK(getfield, symbol, sy);
         jl_sym_t *fld = (jl_sym_t*)sy;
-        idx = jl_field_index(st, fld, 0);
+        idx = jl_field_index(st, fld, 1);
     }
-    jl_value_t* fval = 0;
+    jl_value_t* fval = NULL;
     if (idx != -1) {
         fval = jl_get_nth_field(v, idx);
     }
