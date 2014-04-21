@@ -800,7 +800,9 @@ static jl_value_t *static_eval(jl_value_t *ex, jl_codectx_t *ctx, bool sparams,
             jl_value_t *f = static_eval(jl_exprarg(e,0),ctx,sparams,allow_alloc);
             if (f && jl_is_function(f)) {
                 jl_fptr_t fptr = ((jl_function_t*)f)->fptr;
-                if (fptr == &jl_apply_generic) {
+                size_t nargs = jl_array_dim0(e->args);
+                jl_value_t *a1 = (nargs != 3) ? NULL : static_eval(jl_exprarg(e,1), ctx, sparams, false); 
+                if ( (fptr == &jl_apply_generic) && (!a1 || (!(jl_is_module(a1)))) ) {
                     if (f == jl_get_global(jl_base_module, jl_symbol("dlsym")) ||
                         f == jl_get_global(jl_base_module, jl_symbol("dlopen"))) {
                         size_t i;
@@ -821,7 +823,7 @@ static jl_value_t *static_eval(jl_value_t *ex, jl_codectx_t *ctx, bool sparams,
                         return result;
                     }
                 }
-                else if (jl_array_dim0(e->args) == 3 && fptr == &jl_f_get_field) { // GTF DONE?
+                else if (nargs && ( (fptr == &jl_f_get_field) || (jl_fieldref(jl_exprarg(e,0),0) == (jl_value_t*)getfield_sym)) ) { // GTF DONE?
                     m = (jl_module_t*)static_eval(jl_exprarg(e,1),ctx,sparams,allow_alloc);
                     if (jl_is_field_type(jl_exprarg(e,2)))
                         s = (jl_sym_t*)jl_tupleref( ((jl_datatype_t*)jl_exprarg(e,2))->parameters,0);
@@ -1442,7 +1444,7 @@ static Value *emit_known_call(jl_value_t *ff, jl_value_t **args, size_t nargs,
     jl_value_t *rt1=NULL, *rt2=NULL, *rt3=NULL;
     JL_GC_PUSH3(&rt1, &rt2, &rt3);
     jl_function_t *f = (jl_function_t*)ff;
-    if (f->fptr == &jl_apply_generic) {
+    if (f->fptr == &jl_apply_generic && (nargs < 2 || !(jl_is_module(args[1]))) ) {
         *theFptr = jlapplygeneric_func;
         *theF = f;
         if (ctx->linfo->inferred) {
@@ -1868,7 +1870,7 @@ static Value *emit_known_call(jl_value_t *ff, jl_value_t **args, size_t nargs,
             }
         }
     }
-    else if (f->fptr == &jl_f_get_field && nargs==2) { // GTF PART
+    else if (nargs == 2 && (f->fptr == &jl_f_get_field || (jl_fieldref(jl_exprarg(args[1])) == getfield_sym)) ) { // GTF PART
         jl_value_t* fieldarg = jl_is_expr(args[2]) ? jl_exprarg(args[2],2) : args[2];
         if (jl_is_quotenode(fieldarg) && jl_is_symbol(jl_fieldref(fieldarg,0))) {
             Value *fld = emit_getfield(args[1],

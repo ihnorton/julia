@@ -3,10 +3,15 @@ ccall(:jl_new_main_module, Any, ())
 
 baremodule Base
 
+import Core: apply_type, __getfield, Field
+
 eval(x) = Core.eval(Base,x)
 eval(m,x) = Core.eval(m,x)
 
-include = getfield(Core, :include)
+getfield(x, f) = __getfield(x, f)
+#getfield(x, f::Type{Field}) = __getfield(x, f)
+
+include = __getfield(Core, :include)
 
 include("exports.jl")
 

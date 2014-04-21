@@ -3154,6 +3154,7 @@ void jl_init_types(void)
     top_sym = jl_symbol("top");
     dots_sym = jl_symbol("Vararg");
     field_sym = jl_symbol("Field");
+    getfield_sym = jl_symbol("getfield");
     line_sym = jl_symbol("line");
     jl_incomplete_sym = jl_symbol("incomplete");
     error_sym = jl_symbol("error");

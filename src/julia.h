@@ -405,7 +405,7 @@ extern uv_lib_t *jl_winsock_handle;
 extern jl_sym_t *call_sym;
 extern jl_sym_t *call1_sym;
 extern jl_sym_t *dots_sym;    
-extern DLLEXPORT jl_sym_t *field_sym;
+extern DLLEXPORT jl_sym_t *field_sym; extern jl_sym_t *getfield_sym;
 extern jl_sym_t *quote_sym;   extern jl_sym_t *newvar_sym;
 extern jl_sym_t *top_sym;     extern jl_sym_t *dot_sym;
 extern jl_sym_t *line_sym;    extern jl_sym_t *toplevel_sym;

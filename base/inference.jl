@@ -318,6 +318,7 @@ end
 
 
 const getfield_tfunc = function (A, s0, name)
+    ccall(:jl_breakpoint, Void, ())
     s = s0
     if isType(s)
         s = typeof(s.parameters[1])
@@ -369,6 +370,7 @@ const getfield_tfunc = function (A, s0, name)
         end
         return None
     elseif isa(A[2],Int)
+        ccall(:jl_breakpoint, Void, ())
         if isa(A[1],Module) || s === Module
             return None
         end
@@ -378,6 +380,7 @@ const getfield_tfunc = function (A, s0, name)
         end
         return s.types[i]
     else
+        ccall(:jl_breakpoint, Void, ())
         return reduce(tmerge, None, s.types)#Union(s.types...)
     end
 end
