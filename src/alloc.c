@@ -91,7 +91,7 @@ jl_sym_t *abstracttype_sym; jl_sym_t *bitstype_sym;
 jl_sym_t *compositetype_sym; jl_sym_t *type_goto_sym;
 jl_sym_t *global_sym; jl_sym_t *tuple_sym;
 jl_sym_t *dot_sym;    jl_sym_t *newvar_sym;
-jl_sym_t *field_sym;
+jl_sym_t *field_sym;  jl_sym_t *getfield_sym;
 jl_sym_t *boundscheck_sym; jl_sym_t *copyast_sym;
 jl_sym_t *simdloop_sym;
 

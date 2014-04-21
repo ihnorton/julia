@@ -1870,7 +1870,7 @@ static Value *emit_known_call(jl_value_t *ff, jl_value_t **args, size_t nargs,
             }
         }
     }
-    else if (nargs == 2 && (f->fptr == &jl_f_get_field || (jl_fieldref(jl_exprarg(args[1])) == getfield_sym)) ) { // GTF PART
+    else if (nargs == 2 && (f->fptr == &jl_f_get_field || (jl_fieldref(args[1],0) == (jl_value_t*)getfield_sym)) ) { // GTF PART
         jl_value_t* fieldarg = jl_is_expr(args[2]) ? jl_exprarg(args[2],2) : args[2];
         if (jl_is_quotenode(fieldarg) && jl_is_symbol(jl_fieldref(fieldarg,0))) {
             Value *fld = emit_getfield(args[1],
