@@ -800,9 +800,9 @@ static jl_value_t *static_eval(jl_value_t *ex, jl_codectx_t *ctx, bool sparams,
             jl_value_t *f = static_eval(jl_exprarg(e,0),ctx,sparams,allow_alloc);
             if (f && jl_is_function(f)) {
                 jl_fptr_t fptr = ((jl_function_t*)f)->fptr;
-                size_t nargs = jl_array_dim0(e->args);
-                jl_value_t *a1 = (nargs != 3) ? NULL : static_eval(jl_exprarg(e,1), ctx, sparams, false); 
-                if ( (fptr == &jl_apply_generic) && (!a1 || (!(jl_is_module(a1)))) ) {
+               
+                // we skip getfield generic here so that it doesn't get eaten. TODO: improve this conditional
+                if ( (fptr == &jl_apply_generic) && (jl_fieldref(jl_exprarg(e,0),0) != (jl_value_t*)getfield_sym) ) {
                     if (f == jl_get_global(jl_base_module, jl_symbol("dlsym")) ||
                         f == jl_get_global(jl_base_module, jl_symbol("dlopen"))) {
                         size_t i;
@@ -823,9 +823,8 @@ static jl_value_t *static_eval(jl_value_t *ex, jl_codectx_t *ctx, bool sparams,
                         return result;
                     }
                 }
-                else if ( (nargs  == 3) && ( (fptr == &jl_f_get_field) || (jl_fieldref(jl_exprarg(e,0),0) == (jl_value_t*)getfield_sym)) ) { // GTF DONE?
-                    //m = (jl_module_t*)static_eval(jl_exprarg(e,1),ctx,sparams,allow_alloc);
-                    m = (jl_module_t*)a1;
+                else if ( jl_array_dim0(e->args) == 3 && ( (fptr == &jl_f_get_field) || (jl_fieldref(jl_exprarg(e,0),0) == (jl_value_t*)getfield_sym)) ) { // GTF DONE?
+                    m = (jl_module_t*)static_eval(jl_exprarg(e,1),ctx,sparams,allow_alloc);
                     if (jl_is_field_type(jl_exprarg(e,2)))
                         s = (jl_sym_t*)jl_tupleref( ((jl_datatype_t*)jl_exprarg(e,2))->parameters,0);
                     else
