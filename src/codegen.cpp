@@ -1879,10 +1879,6 @@ static Value *emit_known_call(jl_value_t *ff, jl_value_t **args, size_t nargs,
             JL_GC_POP();
             return fld;
         }
-        //jl_value_t* fieldarg;
-        //if (jl_is_field_type(args[2])) {
-        //    fieldarg = jl_tupleref(((jl_datatype_t*)args[2])->parameters,0);
-        //}
         jl_datatype_t *stt = (jl_datatype_t*)expr_type(args[1], ctx);
         jl_value_t *fldt   = expr_type(args[2], ctx);
         if (jl_is_structtype(stt) && fldt == (jl_value_t*)jl_long_type && !jl_subtype((jl_value_t*)jl_module_type, (jl_value_t*)stt, 0)) {
