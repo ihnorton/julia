@@ -9,10 +9,9 @@ eval(x) = Core.eval(Base,x)
 eval(m,x) = Core.eval(m,x)
 
 getfield(x, f) = __getfield(x, f)
-#getfield(x, f::Type{Field}) = __getfield(x, f)
 
-include = __getfield(Core, :include)
-
+include = Core.include
+ 
 include("exports.jl")
 
 if false
