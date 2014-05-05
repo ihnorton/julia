@@ -3189,7 +3189,7 @@ static Function *emit_function(jl_lambda_info_t *lam, bool cstyle)
     m = jl_Module;
 #endif
 
-    funcName << globalUnique++;
+    funcName << ";" << globalUnique++;
 
     if (specsig) {
         std::vector<Type*> fsig(0);
