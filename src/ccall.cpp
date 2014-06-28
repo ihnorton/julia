@@ -568,6 +568,25 @@ static Value *emit_cglobal(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
     return mark_julia_type(res, rt);
 }
 
+size_t function_argbytes(std::vector<Type*> args)
+{
+    #ifdef LLVM35
+    DataLayout DL(jl_data_layout->getDataLayout());
+    #else
+    const DataLayout* DL = jl_ExecutionEngine->getDataLayout();
+    #endif
+    size_t r = 0;
+    std::vector<Type*>::iterator it = args.begin();
+    for (; it != args.end(); it++) {
+        #ifdef LLVM35
+        r += DL.getTypeAllocSize(*it);
+        #else
+        r += DL->getTypeAllocSize(*it);
+        #endif
+    }
+    return r;
+}
+
 // --- code generator for ccall itself ---
 
 // ccall(pointer, rettype, (argtypes...), args...)
@@ -876,7 +895,23 @@ static Value *emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         needStackRestore |= nSR;
     }
 
-
+    char* use_f_name = f_name;
+#if defined (_OS_WINDOWS_) && defined(_CPU_X86_)
+    // Handle name-mangling for StdCall and FastCall functions on x86.
+    // This is necessary because we do address lookup before the
+    // function actually gets to the LLVM mangler    
+    size_t argbytes = function_argbytes(fargt_sig);
+    std::stringstream new_f_name;
+    if (cc == CallingConv::X86_StdCall || cc == CallingConv::X86_FastCall) {
+        (cc == CallingConv::X86_StdCall) &&
+            new_f_name << "_" << f_name << "@";
+        (cc == CallingConv::X86_FastCall) &&
+            new_f_name << "@" << f_name << "@";
+        new_f_name << argbytes;
+        use_f_name = const_cast<char*>(new_f_name.str().c_str());
+    }
+#endif
+    
     // make LLVM function object for the target
     // keep this close to the function call, so that the compiler can
     // optimize the global pointer load in the common case
@@ -899,10 +934,10 @@ static Value *emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
 
         PointerType *funcptype = PointerType::get(functype,0);
         if (imaging_mode) {
-            llvmf = runtime_sym_lookup(funcptype, f_lib, f_name, ctx);
+            llvmf = runtime_sym_lookup(funcptype, f_lib, use_f_name, ctx);
         }
         else {
-            void *symaddr = jl_dlsym_e(get_library(f_lib), f_name);
+            void *symaddr = jl_dlsym_e(get_library(f_lib), use_f_name);
             if (symaddr == NULL) {
                 JL_GC_POP();
                 std::stringstream msg;
