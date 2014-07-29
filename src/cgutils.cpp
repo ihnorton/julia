@@ -394,7 +394,7 @@ static Type *julia_struct_to_llvm(jl_value_t *jt);
 
 static bool jltupleisbits(jl_value_t *jt, bool allow_unsized = true);
 
-static Type *julia_type_to_llvm(jl_value_t *jt)
+Type *julia_type_to_llvm(jl_value_t *jt)
 {
     if (jt == (jl_value_t*)jl_bool_type) return T_int1;
     if (jt == (jl_value_t*)jl_bottom_type) return T_void;
@@ -478,6 +478,11 @@ static Type *julia_type_to_llvm(jl_value_t *jt)
     }
     return jl_pvalue_llvmt;
 }
+
+extern "C" void *cjulia_type_to_llvm(jl_value_t *jt) {
+    return (void*)julia_type_to_llvm(jt);
+}
+
 
 static Type *julia_struct_to_llvm(jl_value_t *jt)
 {

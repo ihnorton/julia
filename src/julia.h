@@ -865,6 +865,7 @@ DLLEXPORT void jl_init(char *julia_home_dir);
 DLLEXPORT void jl_init_with_image(char *julia_home_dir, char *image_relative_path);
 DLLEXPORT int jl_is_initialized(void);
 DLLEXPORT extern char *julia_home;
+DLLEXPORT void *cjulia_type_to_llvm(jl_value_t* jt);
 
 DLLEXPORT void jl_save_system_image(char *fname);
 DLLEXPORT void jl_restore_system_image(char *fname);
