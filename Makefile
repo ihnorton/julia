@@ -323,6 +323,8 @@ ifeq ($(OS), WINNT)
 	    sed -i "s/\bautocrlf = true$$/autocrlf = input/" "$(DESTDIR)$(prefix)/Git/etc/gitconfig" && \
 	    cp busybox.exe $(DESTDIR)$(prefix)/Git/bin/echo.exe && \
 	    cp busybox.exe $(DESTDIR)$(prefix)/Git/bin/printf.exe )
+	cd $(prefix) && find * > etc/uninstall.log ) && sed -i 's/\//\\/g' etc/uninstall.log && \
+		unix2dos etc/uninstall.log )
 	cd $(DESTDIR)$(bindir) && rm -f llvm* llc.exe lli.exe opt.exe LTO.dll bugpoint.exe macho-dump.exe
 	$(call spawn,./dist-extras/nsis/makensis.exe) -NOCD -DVersion=$(JULIA_VERSION) -DArch=$(ARCH) -DCommit=$(JULIA_COMMIT) ./contrib/windows/build-installer.nsi
 	./dist-extras/7z a -mx9 "julia-install-$(JULIA_COMMIT)-$(ARCH).7z" julia-installer.exe
