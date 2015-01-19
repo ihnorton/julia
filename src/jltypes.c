@@ -1548,6 +1548,8 @@ static int type_eqv_(jl_value_t *a, jl_value_t *b)
                     return 0;
             }
             return 1;
+        } else if (jl_is_type_type(b)) {
+            return a == jl_t0(((jl_datatype_t*)b)->parameters);
         }
         return 0;
     }
