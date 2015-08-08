@@ -750,6 +750,8 @@ lookup:
     }
 }
 
+#include <iostream>
+
 void jl_getFunctionInfo(const char **name, size_t *line, const char **filename, size_t pointer, int *fromC, int skipC)
 {
     *name = NULL;
@@ -834,6 +836,17 @@ void jl_getFunctionInfo(const char **name, size_t *line, const char **filename, 
         if (*line == (size_t) -1) {
             *line = prev.Loc.getLine();
         }
+
+        DILexicalBlockFile locscope = DILexicalBlockFile(prev.Loc.getScope((*it).second.func->getContext()));
+        *filename = locscope.getFilename().data();
+
+        MDNode *inlinedAt = prev.Loc.getInlinedAt((*it).second.func->getContext());
+        if (inlinedAt) {
+            DebugLoc inlineloc = DebugLoc::getFromDILocation(inlinedAt);
+            DILexicalBlockFile inlinescope = DILexicalBlockFile(inlineloc.getScope((*it).second.func->getContext()));
+            jl_printf(JL_STDERR, "inlined at: %s : %d\n", inlinescope.getFilename().data(), inlineloc.getLine());
+        }
+
         return;
     }
 #endif // USE_MCJIT
