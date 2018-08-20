@@ -166,6 +166,8 @@ Julia function. Arguments to [`@cfunction`](@ref) are as follows:
 3. A literal tuple of input types
 
 Like ccall, all of these arguments will be evaluated at compile-time, when the containing method is defined.
+Global pointers returned by `@cfunction` will be null in [precompiled modules](@ref modules-init-and-precomp),
+and must be assigned in the module [`__init__`](@ref) function.
 
 Currently, only the platform-default C calling convention is supported. This means that
 `@cfunction`-generated pointers cannot be used in calls where WINAPI expects `stdcall`

@@ -49,6 +49,10 @@ during compile-time (not deferred until runtime).
 Adding a '\\\$' in front of the function argument changes this to instead create a runtime closure
 over the local variable `callable`.
 
+`@cfunction` must be called at runtime; in particular,
+global pointers returned by `@cfunction` will be null in precompiled modules, so the pointer must be assigned in
+the module `__init__` function.
+
 See [manual section on ccall and cfunction usage](@ref Calling-C-and-Fortran-Code).
 
 # Examples
